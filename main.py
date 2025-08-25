@@ -15,18 +15,29 @@ def record_speech():
             audio = r.listen(source2)
             try:
                 text = r.recognize_google(audio, language="el-GR")
-                print(text)
+                print(f"User: {text}")
+                return text
             except sr.UnknownValueError:
                 print("Could not understand audio")
             except sr.RequestError as e:
                 print("Request error; {0}".format(e))
 
-def translate_speech(text):
+async def translate_speech(text,src_language="el",dest_language="en"):
     """ Sends speech to google translate for translation. """
-    pass
+    translator = Translator()
+    translation = await translator.translate(text,src=src_language,dest=dest_language)
+    print(f"AI: {translation.text}")
+    return translation.text
 
 def speak_translated_text(command):
     """ Plays translated speech as audio. """
-    pass
+    engine = pyttsx3.init()
+    engine.setProperty("voice","com.apple.speech.synthesis.voice.eloquence.en-US.Read")
+    engine.say(command)
+    engine.runAndWait()
+    return
 
-record_speech()
+while True:
+    speech = record_speech()
+    translated_speech = asyncio.run(translate_speech(speech))
+    speak_translated_text(translated_speech)
